@@ -2,4 +2,4 @@
 '@hyperlane-xyz/registry': patch
 ---
 
-Fix botanix logo missing xmlns attribute
+Fix paradex `chainId` in metadata

@@ -257,7 +257,7 @@ arbitrum:
       url: https://arbiscan.io
   blocks:
     confirmations: 1
-    estimateBlockTime: 3
+    estimateBlockTime: 0.25
     reorgPeriod: 5
   chainId: 42161
   deployer:
@@ -1249,6 +1249,44 @@ carrchaintestnet:
   rpcUrls:
     - http: https://rpc-testnet.carrchain.io
   technicalStack: arbitrumnitro
+celestiatestnet:
+  bech32Prefix: celestia
+  blocks:
+    confirmations: 1
+    estimateBlockTime: 6
+    reorgPeriod: 1
+  canonicalAsset: utia
+  chainId: mocha-4
+  contractAddressBytes: 32
+  deployer:
+    name: Abacus Works
+    url: https://www.hyperlane.xyz
+  displayName: Celestia Testnet
+  domainId: 1297040200
+  gasPrice:
+    amount: "0.1"
+    denom: utia
+  grpcUrls:
+    - http: https://grpc-celestia-testnet.mzonder.com:443
+  index:
+    chunk: 10
+    from: 6915786
+  isTestnet: true
+  name: celestiatestnet
+  nativeToken:
+    decimals: 6
+    denom: utia
+    name: Celestia
+    symbol: TIA
+  protocol: cosmosnative
+  restUrls:
+    - http: https://celestia-t-api.noders.services
+  rpcUrls:
+    - http: https://rpc-1.testnet.celestia.nodes.guru
+  slip44: 118
+  technicalStack: other
+  transactionOverrides:
+    gasPrice: "0.0"
 celo:
   blockExplorers:
     - apiKey: IC1UCY8JWIYFWGPCEEE58HKFIFEVN73PVV
@@ -2864,6 +2902,35 @@ fusemainnet:
     - http: https://fuse.liquify.com
     - http: https://fuse-pokt.nodies.app
   technicalStack: other
+galactica:
+  blockExplorers:
+    - apiUrl: https://galactica-mainnet.explorer.alchemy.com/api
+      family: blockscout
+      name: Galactica Explorer
+      url: https://galactica-mainnet.explorer.alchemy.com
+  blocks:
+    confirmations: 1
+    estimateBlockTime: 1
+    reorgPeriod: 0
+  chainId: 613419
+  deployer:
+    name: Abacus Works
+    url: https://www.hyperlane.xyz
+  displayName: Galactica
+  domainId: 613419
+  gasCurrencyCoinGeckoId: galactica-network-gnet
+  index:
+    from: 851
+  isTestnet: false
+  name: galactica
+  nativeToken:
+    decimals: 18
+    name: GNET
+    symbol: GNET
+  protocol: ethereum
+  rpcUrls:
+    - http: https://rpc.galactica.com
+  technicalStack: arbitrumnitro
 galadrieldevnet:
   blockExplorers:
     - apiUrl: https://explorer.galadriel.com/
@@ -3027,6 +3094,10 @@ gravity:
     - http: https://rpc.gravity.xyz
   technicalStack: arbitrumnitro
 guru:
+  availability:
+    reasons:
+      - unavailable
+    status: disabled
   blockExplorers:
     - apiUrl: https://blockscout.gurunetwork.ai/api
       family: blockscout
@@ -3037,9 +3108,6 @@ guru:
     estimateBlockTime: 1
     reorgPeriod: 5
   chainId: 260
-  deployer:
-    name: Abacus Works
-    url: https://www.hyperlane.xyz
   displayName: Guru Network
   domainId: 260
   gasCurrencyCoinGeckoId: guru-network
@@ -3703,6 +3771,10 @@ koitestnet:
   rpcUrls:
     - http: https://koi-rpc.darwinia.network
 kroma:
+  availability:
+    reasons:
+      - unavailable
+    status: disabled
   blockExplorers:
     - apiUrl: https://blockscout.kroma.network/api
       family: blockscout
@@ -3713,9 +3785,6 @@ kroma:
     estimateBlockTime: 2
     reorgPeriod: 5
   chainId: 255
-  deployer:
-    name: Abacus Works
-    url: https://www.hyperlane.xyz
   displayName: Kroma
   domainId: 255
   gasCurrencyCoinGeckoId: ethereum
@@ -5134,7 +5203,7 @@ optimism:
       url: https://optimistic.etherscan.io
   blocks:
     confirmations: 1
-    estimateBlockTime: 3
+    estimateBlockTime: 2
     reorgPeriod: 10
   chainId: 10
   deployer:
@@ -5263,7 +5332,7 @@ paradex:
     confirmations: 1
     estimateBlockTime: 30
     reorgPeriod: 1
-  chainId: "0x534e5f4d41494e"
+  chainId: "0x505249564154455f534e5f50415241434c4541525f4d41494e4e4554"
   deployer:
     name: Abacus Works
     url: https://www.hyperlane.xyz
@@ -6346,7 +6415,7 @@ solaxy:
   gasCurrencyCoinGeckoId: solaxy
   name: solaxy
   nativeToken:
-    decimals: 9
+    decimals: 6
     name: Solaxy
     symbol: SOLX
   protocol: sealevel
@@ -7712,6 +7781,32 @@ xpla:
   protocol: ethereum
   rpcUrls:
     - http: https://dimension-evm-rpc.xpla.dev
+  technicalStack: other
+xrplevm:
+  blockExplorers:
+    - apiUrl: https://explorer.xrplevm.org/api
+      family: blockscout
+      name: XRPL EVM Explorer
+      url: https://explorer.xrplevm.org
+  blocks:
+    confirmations: 1
+    estimateBlockTime: 6
+    reorgPeriod: 5
+  chainId: 1440000
+  deployer:
+    name: Abacus Works
+    url: https://www.hyperlane.xyz
+  displayName: XRPL EVM
+  domainId: 1440000
+  gasCurrencyCoinGeckoId: ripple
+  name: xrplevm
+  nativeToken:
+    decimals: 18
+    name: XRP
+    symbol: XRP
+  protocol: ethereum
+  rpcUrls:
+    - http: https://rpc.xrplevm.org
   technicalStack: other
 zeronetwork:
   blockExplorers:
