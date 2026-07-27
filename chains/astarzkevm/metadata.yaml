@@ -1,3 +1,6 @@
+availability:
+  reasons: [unavailable]
+  status: disabled
 blockExplorers:
   - apiUrl: https://astar-zkevm.explorer.startale.com/api
     family: blockscout
@@ -8,9 +11,6 @@ blocks:
   estimateBlockTime: 3
   reorgPeriod: 5
 chainId: 3776
-deployer:
-  name: Abacus Works
-  url: https://www.hyperlane.xyz
 displayName: Astar zkEVM
 domainId: 3776
 gasCurrencyCoinGeckoId: ethereum

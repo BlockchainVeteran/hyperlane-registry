@@ -1,15 +1,12 @@
 import fs from 'fs';
 import path from 'path';
+
+import type { ChainMetadata } from '@hyperlane-xyz/sdk/metadata/chainMetadataTypes';
+import type { WarpRouteDeployConfig } from '@hyperlane-xyz/sdk/token/types';
+import type { ChainMap, ChainName } from '@hyperlane-xyz/sdk/types';
+import type { WarpCoreConfig } from '@hyperlane-xyz/sdk/warp/types';
 import type { Logger } from 'pino';
 import { parse as yamlParse } from 'yaml';
-
-import type {
-  ChainMap,
-  ChainMetadata,
-  ChainName,
-  WarpCoreConfig,
-  WarpRouteDeployConfig,
-} from '@hyperlane-xyz/sdk';
 
 import {
   CHAIN_FILE_REGEX,
@@ -17,19 +14,22 @@ import {
   WARP_ROUTE_CONFIG_FILE_REGEX,
   WARP_ROUTE_DEPLOY_FILE_REGEX,
 } from '../consts.js';
-import { ChainAddresses, ChainAddressesSchema, WarpRouteId } from '../types.js';
-import { toYamlString } from '../utils.js';
-
 import {
-  AddWarpRouteConfigOptions,
   RegistryType,
-  UpdateChainParams,
   type ChainFiles,
   type IRegistry,
   type RegistryContent,
 } from '../registry/IRegistry.js';
 import { SynchronousRegistry } from '../registry/SynchronousRegistry.js';
 import { warpRouteConfigPathToId, warpRouteDeployConfigPathToId } from '../registry/warp-utils.js';
+import {
+  AddWarpRouteConfigOptions,
+  ChainAddresses,
+  ChainAddressesSchema,
+  UpdateChainParams,
+  WarpRouteId,
+} from '../types.js';
+import { toYamlString } from '../utils.js';
 
 export interface FileSystemRegistryOptions {
   uri: string;

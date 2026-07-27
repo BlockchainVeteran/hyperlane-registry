@@ -1,10 +1,13 @@
 # yaml-language-server: $schema=../schema.json
+availability:
+  reasons: [deprecated]
+  status: disabled
 blockExplorers:
-  - apiKey: 8MU9QJVN429TEYSCMB68NC5MG4VM542CFW
-    apiUrl: https://api.scrollscan.com/api
+  - apiKey: GP69JEAP2W7YFJT9ZJTEPGQT6Y6KMW44ZN
+    apiUrl: https://api.etherscan.io/v2/api?chainid=534352
     family: etherscan
     name: Scroll Explorer
-    url: https://scrollscan.com/
+    url: https://scrollscan.com
 blocks:
   confirmations: 1
   estimateBlockTime: 3
@@ -16,7 +19,7 @@ deployer:
 displayName: Scroll
 domainId: 534352
 gasCurrencyCoinGeckoId: ethereum
-gnosisSafeTransactionServiceUrl: https://safe-transaction-scroll.safe.global
+gnosisSafeTransactionServiceUrl: https://api.safe.global/tx-service/scr
 name: scroll
 nativeToken:
   decimals: 18

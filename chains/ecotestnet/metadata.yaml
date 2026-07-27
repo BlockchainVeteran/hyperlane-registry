@@ -1,8 +1,12 @@
+# yaml-language-server: $schema=../schema.json
+availability:
+  reasons: [unavailable]
+  status: disabled
 blockExplorers:
   - apiUrl: https://eco-testnet.explorer.caldera.xyz/api
     family: blockscout
     name: ECO Testnet explorer
-    url: https://eco-testnet.explorer.caldera.xyz/
+    url: https://eco-testnet.explorer.caldera.xyz
 blocks:
   confirmations: 1
   estimateBlockTime: 1

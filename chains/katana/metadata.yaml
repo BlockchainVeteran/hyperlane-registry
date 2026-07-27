@@ -7,7 +7,7 @@ blockExplorers:
 blocks:
   confirmations: 1
   estimateBlockTime: 1
-  reorgPeriod: 5
+  reorgPeriod: 1
 chainId: 747474
 deployer:
   name: Abacus Works
@@ -22,5 +22,8 @@ nativeToken:
   symbol: ETH
 protocol: ethereum
 rpcUrls:
-  - http: https://katanarpc.com
+  - http: https://rpc.katana.network
 technicalStack: polygoncdk
+transactionOverrides:
+  maxFeePerGas: 10000000
+  maxPriorityFeePerGas: 10000000

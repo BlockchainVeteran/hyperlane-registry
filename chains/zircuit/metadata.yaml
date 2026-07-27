@@ -1,3 +1,6 @@
+availability:
+  reasons: [deprecated]
+  status: disabled
 blockExplorers:
   - apiUrl: https://explorer.zircuit.com/api/contractVerifyHardhat
     family: etherscan
@@ -6,7 +9,7 @@ blockExplorers:
 blocks:
   confirmations: 1
   estimateBlockTime: 2
-  reorgPeriod: 5
+  reorgPeriod: 300
 chainId: 48900
 deployer:
   name: Abacus Works

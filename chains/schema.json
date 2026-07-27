@@ -81,14 +81,24 @@
                 "description": "An API key for the explorer (recommended for better reliability)."
               },
               "family": {
-                "type": "string",
-                "enum": [
-                  "etherscan",
-                  "blockscout",
-                  "routescan",
-                  "voyager",
-                  "zksync",
-                  "other"
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "etherscan",
+                      "blockscout",
+                      "routescan",
+                      "voyager",
+                      "zksync",
+                      "radixdashboard",
+                      "tronscan",
+                      "other",
+                      "unknown"
+                    ]
+                  },
+                  {
+                    "type": "string"
+                  }
                 ],
                 "description": "The type of the block explorer. See ExplorerFamily for valid values."
               }
@@ -141,8 +151,7 @@
         "chainId": {
           "anyOf": [
             {
-              "type": "integer",
-              "exclusiveMinimum": 0
+              "$ref": "#/definitions/hyperlaneChainMetadata/properties/blocks/properties/reorgPeriod/anyOf/0"
             },
             {
               "type": "string"
@@ -199,6 +208,10 @@
           "type": "string",
           "description": "The URL of the gnosis safe transaction service."
         },
+        "gnosisSafeApiKey": {
+          "type": "string",
+          "description": "The API key for the gnosis safe transaction service."
+        },
         "grpcUrls": {
           "type": "array",
           "items": {
@@ -222,7 +235,8 @@
                 "type": "object",
                 "properties": {
                   "maxBlockRange": {
-                    "$ref": "#/definitions/hyperlaneChainMetadata/properties/chainId/anyOf/0",
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
                     "description": "The maximum range between block numbers for which the RPC can query data"
                   },
                   "minBlockNumber": {
@@ -230,7 +244,7 @@
                     "description": "The absolute minimum block number that this RPC supports."
                   },
                   "maxBlockAge": {
-                    "$ref": "#/definitions/hyperlaneChainMetadata/properties/chainId/anyOf/0",
+                    "$ref": "#/definitions/hyperlaneChainMetadata/properties/grpcUrls/items/properties/pagination/properties/maxBlockRange",
                     "description": "The relative different from latest block that this RPC supports."
                   }
                 },
@@ -321,13 +335,24 @@
           "description": "The metadata of the native token of the chain (e.g. ETH for Ethereum)."
         },
         "protocol": {
-          "type": "string",
-          "enum": [
-            "ethereum",
-            "sealevel",
-            "cosmos",
-            "cosmosnative",
-            "starknet"
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "ethereum",
+                "sealevel",
+                "cosmos",
+                "cosmosnative",
+                "starknet",
+                "radix",
+                "aleo",
+                "tron",
+                "unknown"
+              ]
+            },
+            {
+              "type": "string"
+            }
           ],
           "description": "The type of protocol used by this chain. See ProtocolType for valid values."
         },
@@ -351,14 +376,23 @@
           "description": "The SLIP-0044 coin type."
         },
         "technicalStack": {
-          "type": "string",
-          "enum": [
-            "arbitrumnitro",
-            "opstack",
-            "polygoncdk",
-            "polkadotsubstrate",
-            "zksync",
-            "other"
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "arbitrumnitro",
+                "opstack",
+                "polygoncdk",
+                "polkadotsubstrate",
+                "seismic",
+                "zksync",
+                "other",
+                "unknown"
+              ]
+            },
+            {
+              "type": "string"
+            }
           ],
           "description": "The technical stack of the chain. See ChainTechnicalStack for valid values."
         },

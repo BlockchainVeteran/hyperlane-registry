@@ -1,3 +1,6 @@
+availability:
+  reasons: [deprecated]
+  status: disabled
 blockExplorers:
   - apiUrl: https://api.socialscan.io/cyber
     family: other
@@ -14,6 +17,7 @@ deployer:
 displayName: Cyber
 domainId: 7560
 gasCurrencyCoinGeckoId: ethereum
+gnosisSafeTransactionServiceUrl: https://transaction-cyber.safe.optimism.io
 name: cyber
 nativeToken:
   decimals: 18

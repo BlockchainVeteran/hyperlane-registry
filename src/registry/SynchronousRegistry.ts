@@ -1,20 +1,19 @@
-import type {
-  ChainMap,
-  ChainMetadata,
-  ChainName,
-  WarpCoreConfig,
-  WarpRouteDeployConfig,
-} from '@hyperlane-xyz/sdk';
+import type { ChainMetadata } from '@hyperlane-xyz/sdk/metadata/chainMetadataTypes';
+import type { WarpRouteDeployConfig } from '@hyperlane-xyz/sdk/token/types';
+import type { ChainMap, ChainName } from '@hyperlane-xyz/sdk/types';
+import type { WarpCoreConfig } from '@hyperlane-xyz/sdk/warp/types';
 
-import { ChainAddresses, WarpDeployConfigMap, WarpRouteConfigMap, WarpRouteId } from '../types.js';
-import { BaseRegistry } from './BaseRegistry.js';
 import {
   AddWarpRouteConfigOptions,
-  IRegistry,
-  RegistryContent,
+  ChainAddresses,
   UpdateChainParams,
+  WarpDeployConfigMap,
+  WarpRouteConfigMap,
   WarpRouteFilterParams,
-} from './IRegistry.js';
+  WarpRouteId,
+} from '../types.js';
+import { BaseRegistry } from './BaseRegistry.js';
+import { IRegistry, RegistryContent } from './IRegistry.js';
 import { filterWarpRoutesIds } from './warp-utils.js';
 
 /**

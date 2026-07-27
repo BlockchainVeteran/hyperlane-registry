@@ -1,22 +1,13 @@
+import type { ChainMetadata } from '@hyperlane-xyz/sdk/metadata/chainMetadataTypes';
+import type { WarpRouteDeployConfig } from '@hyperlane-xyz/sdk/token/types';
+import type { ChainMap, ChainName } from '@hyperlane-xyz/sdk/types';
+import type { WarpCoreConfig } from '@hyperlane-xyz/sdk/warp/types';
 import type { Logger } from 'pino';
 
-import type {
-  ChainMap,
-  ChainMetadata,
-  ChainName,
-  WarpCoreConfig,
-  WarpRouteDeployConfig,
-} from '@hyperlane-xyz/sdk';
-import { ChainAddresses, DeepPartial, WarpRouteId } from '../types.js';
-import {
-  AddWarpRouteConfigOptions,
-  ChainFiles,
-  IRegistry,
-  RegistryContent,
-  RegistryType,
-} from './IRegistry.js';
-import { SynchronousRegistry } from './SynchronousRegistry.js';
+import { AddWarpRouteConfigOptions, ChainAddresses, DeepPartial, WarpRouteId } from '../types.js';
 import { BaseRegistry } from './BaseRegistry.js';
+import { ChainFiles, IRegistry, RegistryContent, RegistryType } from './IRegistry.js';
+import { SynchronousRegistry } from './SynchronousRegistry.js';
 const PARTIAL_URI_PLACEHOLDER = '__partial_registry__';
 
 /**

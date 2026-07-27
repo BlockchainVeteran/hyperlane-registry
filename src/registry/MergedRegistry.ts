@@ -1,22 +1,20 @@
+import type { ChainMetadata } from '@hyperlane-xyz/sdk/metadata/chainMetadataTypes';
+import type { WarpRouteDeployConfig } from '@hyperlane-xyz/sdk/token/types';
+import type { ChainMap, ChainName } from '@hyperlane-xyz/sdk/types';
+import type { WarpCoreConfig } from '@hyperlane-xyz/sdk/warp/types';
 import type { Logger } from 'pino';
 
-import type {
-  ChainMap,
-  ChainMetadata,
-  ChainName,
-  WarpCoreConfig,
-  WarpRouteDeployConfig,
-} from '@hyperlane-xyz/sdk';
-import { ChainAddresses, WarpDeployConfigMap, WarpRouteConfigMap, WarpRouteId } from '../types.js';
-import { objMerge } from '../utils.js';
 import {
   AddWarpRouteConfigOptions,
-  IRegistry,
-  RegistryContent,
-  RegistryType,
+  ChainAddresses,
   UpdateChainParams,
+  WarpDeployConfigMap,
+  WarpRouteConfigMap,
   WarpRouteFilterParams,
-} from './IRegistry.js';
+  WarpRouteId,
+} from '../types.js';
+import { objMerge } from '../utils.js';
+import { IRegistry, IRegistryMethods, RegistryContent, RegistryType } from './IRegistry.js';
 
 export interface MergedRegistryOptions {
   registries: Array<IRegistry>;
@@ -87,6 +85,7 @@ export class MergedRegistry implements IRegistry {
   async addChain(chain: UpdateChainParams): Promise<void> {
     return this.multiRegistryWrite(
       async (registry) => await registry.addChain(chain),
+      'addChain',
       `adding chain ${chain.chainName}`,
     );
   }
@@ -94,6 +93,7 @@ export class MergedRegistry implements IRegistry {
   async updateChain(chain: UpdateChainParams): Promise<void> {
     return this.multiRegistryWrite(
       async (registry) => await registry.updateChain(chain),
+      'updateChain',
       `updating chain ${chain.chainName}`,
     );
   }
@@ -101,6 +101,7 @@ export class MergedRegistry implements IRegistry {
   async removeChain(chain: ChainName): Promise<void> {
     return this.multiRegistryWrite(
       async (registry) => await registry.removeChain(chain),
+      'removeChain',
       `removing chain ${chain}`,
     );
   }
@@ -128,6 +129,7 @@ export class MergedRegistry implements IRegistry {
   async addWarpRoute(config: WarpCoreConfig, options?: AddWarpRouteConfigOptions): Promise<void> {
     return this.multiRegistryWrite(
       async (registry) => await registry.addWarpRoute(config, options),
+      'addWarpRoute',
       'adding warp route',
     );
   }
@@ -138,22 +140,44 @@ export class MergedRegistry implements IRegistry {
   ): Promise<void> {
     return this.multiRegistryWrite(
       async (registry) => await registry.addWarpRouteConfig(config, options),
+      'addWarpRouteConfig',
       'adding warp route deploy config',
     );
   }
 
   protected multiRegistryRead<R>(readFn: (registry: IRegistry) => Promise<R> | R) {
-    return Promise.all(this.registries.map(readFn));
+    return Promise.all(
+      this.registries.map(async (registry) => {
+        try {
+          return { ok: true as const, value: await readFn(registry) };
+        } catch (error) {
+          if (isNotFoundError(error)) {
+            this.logger.debug(
+              `Tolerating not-found read miss from ${registry.type} registry at ${registry.uri}`,
+            );
+            return { ok: false as const, error };
+          }
+          throw error;
+        }
+      }),
+    ).then((results) => {
+      const successResults = results.filter((result) => result.ok);
+      if (!successResults.length) {
+        const notFoundResult = results.find((result) => !result.ok);
+        if (notFoundResult) throw notFoundResult.error;
+      }
+      return results.map((result) => (result.ok ? result.value : (null as R)));
+    });
   }
 
   protected async multiRegistryWrite(
     writeFn: (registry: IRegistry) => Promise<void>,
+    methodName: IRegistryMethods,
     logMsg: string,
   ): Promise<void> {
     for (const registry of this.registries) {
-      // TODO remove this when GithubRegistry supports write methods
-      if (registry.type === RegistryType.Github) {
-        this.logger.warn(`Skipping ${logMsg} at ${registry.type} registry`);
+      if (registry.unimplementedMethods?.has(methodName)) {
+        this.logger.warn(`Skipping ${logMsg} at ${registry.type} registry (not supported)`);
         continue;
       }
       try {
@@ -173,4 +197,22 @@ export class MergedRegistry implements IRegistry {
       logger: this.logger,
     });
   }
+}
+
+function isNotFoundError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false;
+  const { code, message, status, statusCode, response } = error as {
+    code?: unknown;
+    message?: unknown;
+    status?: unknown;
+    statusCode?: unknown;
+    response?: { status?: unknown; statusCode?: unknown };
+  };
+  return (
+    [status, statusCode, response?.status, response?.statusCode].some(
+      (candidate) => Number(candidate) === 404,
+    ) ||
+    code === 'ENOENT' ||
+    (typeof message === 'string' && /^File not found(?:\b|:)/i.test(message))
+  );
 }

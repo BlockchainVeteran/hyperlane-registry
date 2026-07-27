@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=../schema.json
 blockExplorers:
-  - apiKey: NXSXUUUAUDD5SYGQUIVS9TZTBCEG6X5THY
-    apiUrl: https://api.bscscan.com/api
+  - apiKey: GP69JEAP2W7YFJT9ZJTEPGQT6Y6KMW44ZN
+    apiUrl: https://api.etherscan.io/v2/api?chainid=56
     family: etherscan
     name: BscScan
     url: https://bscscan.com
@@ -17,7 +17,7 @@ displayName: Binance Smart Chain
 displayNameShort: Binance
 domainId: 56
 gasCurrencyCoinGeckoId: binancecoin
-gnosisSafeTransactionServiceUrl: https://safe-transaction-bsc.safe.global/
+gnosisSafeTransactionServiceUrl: https://api.safe.global/tx-service/bnb
 name: bsc
 nativeToken:
   decimals: 18
@@ -25,9 +25,9 @@ nativeToken:
   symbol: BNB
 protocol: ethereum
 rpcUrls:
+  - http: https://bsc.blockrazor.xyz
+  - http: https://bsc-pokt.nodies.app
   - http: https://bsc.drpc.org
   - http: https://bnb.rpc.subquery.network/public
   - http: https://binance.llamarpc.com
-  - http: https://bsc.blockrazor.xyz
-  - http: https://bsc-pokt.nodies.app
 technicalStack: other

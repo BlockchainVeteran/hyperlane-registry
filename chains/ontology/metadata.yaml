@@ -1,9 +1,12 @@
 # yaml-language-server: $schema=../schema.json
+availability:
+  reasons: [deprecated]
+  status: disabled
 blockExplorers:
   - apiUrl: https://explorer.ont.io/api
     family: other
     name: Ontology Explorer
-    url: https://explorer.ont.io/
+    url: https://explorer.ont.io
 blocks:
   confirmations: 1
   estimateBlockTime: 1

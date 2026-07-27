@@ -13,9 +13,42 @@ fi
 export BASE_COMMIT="$1"
 export HEAD_COMMIT="$2"
 
+is_m0_warp_route() {
+    local warp_route_id="$1"
+    local config_file="deployments/warp_routes/${warp_route_id}-config.yaml"
+
+    [ -f "$config_file" ] || return 1
+
+    grep -Eq 'standard:[[:space:]]*EvmM0Portal(Lite)?' "$config_file"
+}
+
+# Warp routes the published `hyperlane warp check` CLI cannot verify on-chain,
+# so they are excluded from this PR check to avoid unactionable failures:
+# - celestia-solanamainnet / celestia-eclipsemainnet: no EVM chain in the route,
+#   so `warp check` throws "requires at least one EVM chain in the selected route
+#   config" and can never pass.
+# - abstract-celestia: no abstract block explorer is configured in CI, so the
+#   contractVerificationStatus lookup fails the check. Revisit if an abstract
+#   explorer is added.
+ROUTES_TO_SKIP=(
+    "TIA/celestia-solanamainnet"
+    "TIA/celestia-eclipsemainnet"
+    "TIA/abstract-celestia"
+)
+
+is_skipped_warp_route() {
+    local warp_route_id="$1"
+    local skip
+    for skip in "${ROUTES_TO_SKIP[@]}"; do
+        [ "$skip" = "$warp_route_id" ] && return 0
+    done
+    return 1
+}
+
 WARP_ROUTE_IDS=$(
     # ARM = Additions, Renames, Modifications
-    git diff --diff-filter=ARM "$BASE_COMMIT".."$HEAD_COMMIT" --name-only |
+    # Use three-dot syntax to only show changes from the branch, not changes from main
+    git diff --diff-filter=ARM "$BASE_COMMIT"..."$HEAD_COMMIT" --name-only |
     grep -E 'warp_routes/.+-(config|deploy)\.yaml$' |
     sed -E 's|deployments/warp_routes/||' |
     sed -E 's|-config\.yaml$||' |
@@ -30,44 +63,97 @@ for ID in $WARP_ROUTE_IDS; do
     echo "- $ID"
 done
 
+# Exit early if no warp routes to check
+if [ -z "$WARP_ROUTE_IDS" ]; then
+    echo "No warp routes to check!"
+    exit 0
+fi
+
 # Initialize the job summary
 JOB_SUMMARY="## Check Warp Deploy Summary\n"
-
-if [ -z "$WARP_ROUTE_IDS" ]; then
-    JOB_SUMMARY+="No warp routes to check!"
-else
-    JOB_SUMMARY+="| Warp Route ID | Status |\n|-|-|\n"
-fi
+JOB_SUMMARY+="| Warp Route ID | On-Chain | Config Sync |\n|-|-|-|\n"
 
 EXIT_CODE=0
 
-# Run the Docker image for each warp route ID and update the job summary
 for WARP_ROUTE_ID in $WARP_ROUTE_IDS; do
     export WARP_ROUTE_ID
-    if docker run --rm \
-        -e REGISTRY_COMMIT=$HEAD_COMMIT \
-        -e CI=true \
-        gcr.io/abacus-labs-dev/hyperlane-monorepo:main \
-        ./node_modules/.bin/tsx \
-        ./typescript/infra/scripts/check/check-deploy.ts \
-        -e mainnet3 \
-        -m warp \
-        --warpRouteId $WARP_ROUTE_ID; then
-      STATUS="✅"
+
+    if is_m0_warp_route "$WARP_ROUTE_ID"; then
+      ONCHAIN_STATUS="N/A (M0 exempt)"
+      CONFIG_SYNC_STATUS="N/A (M0 exempt)"
+      JOB_SUMMARY+="| $WARP_ROUTE_ID | $ONCHAIN_STATUS | $CONFIG_SYNC_STATUS |\n"
+      continue
+    fi
+
+    if is_skipped_warp_route "$WARP_ROUTE_ID"; then
+      ONCHAIN_STATUS="N/A (skipped)"
+      CONFIG_SYNC_STATUS="N/A (skipped)"
+      JOB_SUMMARY+="| $WARP_ROUTE_ID | $ONCHAIN_STATUS | $CONFIG_SYNC_STATUS |\n"
+      continue
+    fi
+    
+    # Check 1: Registry YAML vs on-chain via published CLI
+    if hyperlane \
+        --registry "$(pwd)" \
+        -y \
+        warp check \
+        --warp-route-id "$WARP_ROUTE_ID"; then
+      ONCHAIN_STATUS="✅"
     else
-      STATUS="❌"
+      ONCHAIN_STATUS="❌"
       EXIT_CODE=1
     fi
-    JOB_SUMMARY+="| $WARP_ROUTE_ID | $STATUS |\n"
+    
+    # Check 2: Config getter output matches registry YAML (no diff after export)
+    DEPLOY_FILE="deployments/warp_routes/${WARP_ROUTE_ID}-deploy.yaml"
+    if [ -f "$DEPLOY_FILE" ]; then
+        cp "$DEPLOY_FILE" /tmp/registry-deploy-before.yaml
+        SANITIZED_WARP_ROUTE_ID="${WARP_ROUTE_ID//\//-}"
+        EXPORT_LOG="/tmp/registry-export-${SANITIZED_WARP_ROUTE_ID}.log"
+        
+        if docker run --rm \
+            -e CI=true \
+            -e REGISTRY_URI=/registry \
+            -v "$(pwd)":/registry \
+            ghcr.io/hyperlane-xyz/hyperlane-monorepo:main \
+            ./node_modules/.bin/tsx \
+            ./typescript/infra/scripts/warp-routes/export-warp-configs.ts \
+            -e mainnet3 \
+            --warpRouteId "$WARP_ROUTE_ID" > "$EXPORT_LOG" 2>&1; then
+            if diff -q "$DEPLOY_FILE" /tmp/registry-deploy-before.yaml > /dev/null 2>&1; then
+                CONFIG_SYNC_STATUS="✅"
+            else
+                CONFIG_SYNC_STATUS="❌ (config getter differs)"
+                EXIT_CODE=1
+            fi
+        else
+            CONFIG_SYNC_STATUS="❌ (export failed)"
+            EXIT_CODE=1
+            echo "export-warp-configs failed for $WARP_ROUTE_ID"
+            cat "$EXPORT_LOG"
+        fi
+        
+        cp /tmp/registry-deploy-before.yaml "$DEPLOY_FILE"
+        rm -f /tmp/registry-deploy-before.yaml "$EXPORT_LOG"
+    else
+        CONFIG_SYNC_STATUS="N/A"
+    fi
+    
+    JOB_SUMMARY+="| $WARP_ROUTE_ID | $ONCHAIN_STATUS | $CONFIG_SYNC_STATUS |\n"
 done
 
-# Output the job summary to a file if PR_NUMBER is set
+# Add readable timestamp to the job summary
+TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
+JOB_SUMMARY+="\n*Last updated: $TIMESTAMP UTC*\n"
+
+# Always write to GitHub Actions job summary (visible on workflow run page)
+if [ -n "$GITHUB_STEP_SUMMARY" ]; then
+    echo -e "$JOB_SUMMARY" >> "$GITHUB_STEP_SUMMARY"
+fi
+
+# Post PR comment if PR_NUMBER is set (non-fork PRs only)
 if [ -n "$PR_NUMBER" ]; then
     echo "Writing job summary to check_warp_deploy_summary.txt"
-
-    # Add readable timestamp to the job summary
-    TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
-    JOB_SUMMARY+="\n*Last updated: $TIMESTAMP UTC*\n"
 
     echo -e "$JOB_SUMMARY" > check_warp_deploy_summary.txt
 

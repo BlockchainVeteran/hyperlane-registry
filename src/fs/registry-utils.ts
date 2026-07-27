@@ -1,15 +1,19 @@
 import type { Logger } from 'pino';
-import { GithubRegistry } from '../registry/GithubRegistry.js';
-import { FileSystemRegistry } from './FileSystemRegistry.js';
-import { IRegistry } from '../registry/IRegistry.js';
-import { PROXY_DEPLOYED_URL } from '../consts.js';
-import { MergedRegistry } from '../registry/MergedRegistry.js';
 
-const isHttpsUrl = (value: string): boolean => {
+import { PROXY_DEPLOYED_URL } from '../consts.js';
+import { GithubRegistry } from '../registry/GithubRegistry.js';
+import { HttpClientRegistry } from '../registry/HttpClientRegistry.js';
+import { IRegistry } from '../registry/IRegistry.js';
+import { MergedRegistry } from '../registry/MergedRegistry.js';
+import { FileSystemRegistry } from './FileSystemRegistry.js';
+
+type Protocol = 'http:' | 'https:';
+
+const isProtocolUrl = (value: string, protocols: Protocol[]): boolean => {
   try {
     if (!value) return false;
     const url = new URL(value);
-    return url.protocol === 'https:';
+    return protocols.includes(url.protocol as Protocol);
   } catch {
     return false;
   }
@@ -71,7 +75,7 @@ export function getRegistry({
     .filter((uri) => !!uri)
     .map((uri, index) => {
       const childLogger = registryLogger?.child({ uri, index });
-      if (isHttpsUrl(uri)) {
+      if (isProtocolUrl(uri, ['https:']) && uri.includes('github')) {
         return new GithubRegistry({
           uri,
           branch,
@@ -79,6 +83,8 @@ export function getRegistry({
           proxyUrl: enableProxy ? PROXY_DEPLOYED_URL : undefined,
           authToken,
         });
+      } else if (isProtocolUrl(uri, ['http:', 'https:'])) {
+        return new HttpClientRegistry(uri);
       } else {
         if (!isValidFilePath(uri)) {
           throw new Error(`Invalid file system path: ${uri}`);
